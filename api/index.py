@@ -1,9 +1,10 @@
 import sys
 import os
 
-# Add root folder to python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.main import app
+from mangum import Mangum
 
-# Vercel serverless handler expects a callable app
+# Vercel serverless entry point using Mangum ASGI handler
+handler = Mangum(app)
