@@ -172,7 +172,11 @@ async def lifespan(app: FastAPI):
     yield
 
 
+from fastapi.responses import FileResponse
+import os
+
 app = FastAPI(title="CozyBrew Coffee Shop Support", lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -180,6 +184,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- ADD THIS ROOT ROUTE HERE ---
+@app.get("/")
+async def root():
+    # Looks for frontend/chat.html relative to backend directory
+    chat_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "chat.html")
+    if os.path.exists(chat_file_path):
+        return FileResponse(chat_file_path)
+    return {"message": "CozyBrew AI Support Agent API is live!", "docs": "/docs"}
 
 
 class ConnectionManager:
