@@ -1,0 +1,103 @@
+{
+  "company_info": {
+    "name": "CozyBrew Coffee Shop",
+    "hours": "Monday-Friday: 7am-8pm, Saturday-Sunday: 8am-9pm",
+    "location": "Stadium Main Street, Downtown Texas",
+    "phone": "+1-585-0131",
+    "email": "hello@cozybrew.gmail.com"
+  },
+  "menu": {
+    "coffee": [
+      {
+        "name": "Espresso",
+        "price": "$3.50",
+        "available": true
+      },
+      {
+        "name": "Latte",
+        "price": "$5.57",
+        "available": true
+      },
+      {
+        "name": "Cappuccino",
+        "price": "$4.50",
+        "available": true
+      },
+      {
+        "name": "Cold Brew",
+        "price": "$4.00",
+        "available": true
+      },
+      {
+        "name": "Ice Berg",
+        "price": "$5.00",
+        "available": true
+      },
+      {
+        "name": "tea",
+        "price": "2.30$",
+        "available": true
+      },
+      {
+        "name": "mocha",
+        "price": "3.20",
+        "available": true
+      },
+      {
+        "name": "Frappe",
+        "price": "$5.50"
+      },
+      {
+        "name": "Frappe",
+        "price": "$5.50"
+      }
+    ],
+    "food": [
+      {
+        "name": "Croissant",
+        "price": "$3.00",
+        "available": true
+      },
+      {
+        "name": "Avocado Toast",
+        "price": "$7.00",
+        "available": true
+      },
+      {
+        "name": "Sandwich",
+        "price": "$5.50",
+        "available": true
+      },
+      {
+        "name": "Biryani",
+        "price": "$15",
+        "available": true
+      }
+    ],
+    "other": []
+  },
+  "policies": {
+    "wifi": "Free WiFi available for all customers",
+    "parking": "Street parking available, validated parking at City Garage",
+    "reservations": "No reservations needed on weekdays, walk-ins welcome",
+    "allergies": "Please inform staff about allergies, we accommodate dietary restrictions"
+  },
+  "faqs": [
+    {
+      "question": "Do you have vegan options?",
+      "answer": "Yes! We offer oat milk, almond milk, and soy milk. Our avocado toast is vegan."
+    },
+    {
+      "question": "Is there WiFi?",
+      "answer": "Yes, free WiFi is available for all customers. Password: CoffeeTime2024"
+    },
+    {
+      "question": "Can I work here with my laptop?",
+      "answer": "Absolutely! We have plenty of outlets and comfortable seating. Many people use our space for work."
+    },
+    {
+      "question": "Do you deliver?",
+      "answer": "We partner with UberEats and DoorDash for delivery within 3 miles."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[project]
+name = "ai-support-agent"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.143.0",
+    "google-api-python-client>=2.201.0",
+    "gspread>=6.2.1",
+    "httpx>=0.28.1",
+    "langchain-openai>=1.7.2",
+    "openai>=3.28.0",
+    "python-dotenv>=1.2.4",
+    "spglib>=2.8.0",
+    "uvicorn>=0.54.0",
+]

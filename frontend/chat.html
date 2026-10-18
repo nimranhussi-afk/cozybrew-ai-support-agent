@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CozyBrew Coffee Shop</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --espresso: #3c2415; --cappuccino: #6f4e37; --latte: #d4a574;
+            --cream: #f5e6d3; --accent: #c17f45; --gold: #d4af37; --red: #c0392b;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0f08 0%, #2c1810 50%, #1a0f08 100%);
+            color: var(--cream); min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--espresso) 0%, var(--cappuccino) 100%);
+            padding: 40px; text-align: center; border-bottom: 4px solid var(--gold);
+        }
+        .header h1 { color: var(--gold); font-size: 3.5em; font-weight: 800; }
+        .nav { display: flex; justify-content: center; gap: 15px; padding: 20px; background: rgba(60, 36, 21, 0.8); }
+        .nav-btn, .admin-btn, .tab-btn {
+            background: var(--cappuccino); color: var(--cream); border: none;
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold;
+        }
+        .nav-btn.active, .tab-btn.active { background: var(--gold); color: var(--espresso); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .section, .tab-content { display: none; }
+        .section.active, .tab-content.active { display: block; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+        .info-card { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        .info-card h3 { color: var(--latte); margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: var(--gold); color: var(--espresso); }
+        .status-btn {
+            background: var(--gold); color: var(--espresso); border: none;
+            padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;
+        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: rgba(0,0,0,0.5); padding: 30px; border-radius: 10px; text-align: center; border-left: 4px solid var(--gold); }
+        .stat-card p { font-size: 2em; font-weight: bold; color: var(--gold); margin-top: 10px; }
+
+        .add-item-card {
+            background: rgba(0,0,0,0.4); border: 2px solid var(--gold); border-radius: 15px;
+            padding: 25px; max-width: 500px; margin: 20px 0;
+        }
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-weight: bold; color: var(--latte); }
+        .form-group input, .form-group select {
+            padding: 10px; border-radius: 8px; border: 1px solid var(--cappuccino);
+            background: rgba(0,0,0,0.5); color: white; font-size: 1em;
+        }
+
+        .chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 1000; }
+        .chat-toggle {
+            background: var(--gold); color: var(--espresso); border: none;
+            width: 60px; height: 60px; border-radius: 50%; font-size: 2em; cursor: pointer;
+        }
+        .chat-box {
+            position: absolute; bottom: 80px; right: 0; width: 380px; height: 520px;
+            background: var(--espresso); border: 3px solid var(--gold); border-radius: 15px;
+            display: none; flex-direction: column; overflow: hidden;
+        }
+        .chat-box.active { display: flex; }
+        .chat-header { background: var(--cappuccino); padding: 15px; display: flex; justify-content: space-between; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; line-height: 1.5; max-width: 85%; }
+        .message.agent .message-bubble { background: var(--cappuccino); color: var(--cream); align-self: flex-start; }
+        .message.user .message-bubble { background: var(--gold); color: var(--espresso); align-self: flex-end; }
+        .chat-input-area { display: flex; padding: 15px; background: var(--cappuccino); }
+        .chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: rgba(0,0,0,0.3); color: white; }
+        .chat-send { background: var(--gold); border: none; padding: 10px 20px; border-radius: 20px; margin-left: 10px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="website-view">
+        <header class="header">
+            <h1>☕ CozyBrew Coffee Shop</h1>
+            <p>Where every cup tells a story ✨</p>
+        </header>
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showSection('home', event)">Home</button>
+            <button class="nav-btn" onclick="showSection('menu', event)">Menu</button>
+            <button class="nav-btn" onclick="showAdmin()">⚙️ Admin</button>
+        </nav>
+        <div class="container">
+            <div class="section active" id="section-home">
+                <h2>Welcome to CozyBrew ☕</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🌱 Our Mission</h3>
+                        <p>We source only the finest coffee beans and ingredients from sustainable farms around the world.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>🏆 Our Promise</h3>
+                        <p>Quality, warmth, and hospitality in every single cup and plate we serve.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>⏰ Hours & Location</h3>
+                        <p>Mon-Fri: 7am-8pm | Sat-Sun: 8am-9pm<br>123 Coffee Lane, Downtown Texas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="section" id="section-menu">
+                <h2>☕ Our Menu</h2>
+                <div id="menu-container" class="info-grid">Loading menu...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-view" style="display: none; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <h1 style="color:var(--gold);">☕ Admin Dashboard</h1>
+            <div>
+                <button class="admin-btn" onclick="showWebsite()">← Website</button>
+                <button class="admin-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="tab-btn active" onclick="showAdminTab('tickets', event)">Tickets</button>
+            <button class="tab-btn" onclick="showAdminTab('orders', event)">Orders</button>
+            <button class="tab-btn" onclick="showAdminTab('conversations', event)">Conversations</button>
+            <button class="tab-btn" onclick="showAdminTab('statistics', event)">Statistics</button>
+            <button class="tab-btn" onclick="showAdminTab('addmenu', event)">➕ Add Menu Item</button>
+        </div>
+        <div id="tickets-tab" class="tab-content active"><div id="tickets-table"></div></div>
+        <div id="orders-tab" class="tab-content"><div id="orders-table"></div></div>
+        <div id="conversations-tab" class="tab-content"><div id="conversations-table"></div></div>
+        <div id="statistics-tab" class="tab-content"><div id="statistics-content"></div></div>
+        <div id="addmenu-tab" class="tab-content">
+            <div class="add-item-card">
+                <h2 style="color:var(--gold); margin-bottom:15px;">➕ Add New Item to Menu</h2>
+                <form id="add-menu-form" onsubmit="handleAddMenu(event)">
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="menu-item-name" placeholder="e.g. Frappe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="text" id="menu-item-price" placeholder="e.g. $5.50" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="menu-item-category">
+                            <option value="coffee">Coffee</option>
+                            <option value="food">Food</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="status-btn" style="width:100%; padding:12px; font-size:1.1em; margin-top:10px;">Save to Menu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-widget">
+        <button class="chat-toggle" onclick="toggleChat()">💬</button>
+        <div class="chat-box" id="chat-box">
+            <div class="chat-header">
+                <h3>💬 CozyBrew Support</h3>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:1.5em; cursor:pointer;">×</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="chat-send" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+        let ws = null;
+
+        function showSection(id, evt) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('section-' + id).classList.add('active');
+            if(evt && evt.target) evt.target.classList.add('active');
+            if (id === 'menu') loadMenu();
+        }
+
+        function showAdmin() {
+            document.getElementById('website-view').style.display = 'none';
+            document.getElementById('admin-view').style.display = 'block';
+            refreshData();
+        }
+
+        function showWebsite() {
+            document.getElementById('admin-view').style.display = 'none';
+            document.getElementById('website-view').style.display = 'block';
+        }
+
+        function showAdminTab(tab, evt) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            if(evt && evt.target) evt.target.classList.add('active');
+        }
+
+        async function refreshData() {
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/data`);
+                const data = await res.json();
+                renderTable('tickets', data.tickets, false);
+                renderTable('orders', data.orders, true);
+                renderTable('conversations', data.conversations, false);
+                renderStatistics(data);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderTable(tabName, rows, isOrders = false) {
+            const container = document.getElementById(tabName + '-table');
+            if (!rows || rows.length < 2) { container.innerHTML = '<p>No data available.</p>'; return; }
+            let html = '<table><thead><tr>';
+            rows[0].forEach(h => html += `<th>${h}</th>`);
+            if (isOrders) html += '<th>Action</th>';
+            html += '</tr></thead><tbody>';
+
+            rows.slice(1).forEach((row, idx) => {
+                const orderId = row[0];
+                html += '<tr>';
+                row.forEach((cell, cellIdx) => {
+                    if (isOrders && cellIdx === 4) {
+                        html += `<td id="status-${idx}" style="color: ${cell === 'Delivered' ? '#4caf50' : '#ff9800'}; font-weight: bold;">${cell}</td>`;
+                    } else {
+                        html += `<td>${cell || ''}</td>`;
+                    }
+                });
+                if (isOrders) {
+                    html += `<td><button class="status-btn" onclick="toggleOrderStatus('${orderId}', ${idx})">Toggle Status</button></td>`;
+                }
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function toggleOrderStatus(orderId, idx) {
+            const statusCell = document.getElementById(`status-${idx}`);
+            if (statusCell) {
+                const current = statusCell.textContent.trim();
+                const newStatus = current === 'Delivered' ? 'Pending' : 'Delivered';
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/admin/order/${encodeURIComponent(orderId)}/status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    if (res.ok) {
+                        statusCell.textContent = newStatus;
+                        statusCell.style.color = newStatus === 'Delivered' ? '#4caf50' : '#ff9800';
+                    }
+                } catch(e) {
+                    console.error('Failed to update status', e);
+                }
+            }
+        }
+
+        async function handleAddMenu(e) {
+            e.preventDefault();
+            const name = document.getElementById('menu-item-name').value;
+            let price = document.getElementById('menu-item-price').value;
+            if(!price.startsWith('$')) price = '$' + price;
+            const category = document.getElementById('menu-item-category').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/menu/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, price, category })
+                });
+                if (res.ok) {
+                    alert(`Successfully added ${name} to the menu!`);
+                    document.getElementById('add-menu-form').reset();
+                    loadMenu();
+                }
+            } catch(e) {
+                alert('Failed to add item to menu.');
+            }
+        }
+
+        function renderStatistics(data) {
+            const orders = data.orders ? data.orders.slice(1) : [];
+            const tickets = data.tickets ? data.tickets.slice(1) : [];
+            const totalOrders = orders.length;
+            const totalTickets = tickets.length;
+            const totalRevenue = orders.reduce((sum, row) => sum + (parseFloat(row[3]) || 0), 0);
+
+            document.getElementById('statistics-content').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Orders</h3>
+                        <p>${totalOrders}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Tickets</h3>
+                        <p>${totalTickets}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Revenue</h3>
+                        <p>$${totalRevenue.toFixed(2)}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadMenu() {
+            try {
+                const res = await fetch(`${API_BASE}/api/menu`);
+                const menu = await res.json();
+                let html = '';
+                for (let cat in menu) {
+                    if (Array.isArray(menu[cat])) {
+                        menu[cat].forEach(item => {
+                            html += `
+                                <div class="info-card">
+                                    <h3>🍽️ ${item.name}</h3>
+                                    <p style="color:var(--gold); font-size:1.2em; font-weight:bold;">${item.price}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+                document.getElementById('menu-container').innerHTML = html || '<p>No menu items available.</p>';
+            } catch(e) {
+                document.getElementById('menu-container').innerHTML = '<p>Error loading menu.</p>';
+            }
+        }
+
+        function toggleChat() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.classList.toggle('active');
+            if (chatBox.classList.contains('active') && !ws) connectWS();
+        }
+
+        function connectWS() {
+            ws = new WebSocket(`ws://localhost:8000/ws/${sessionId}`);
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.type === "status_update") {
+                    const chatBox = document.getElementById('chat-box');
+                    if (!chatBox.classList.contains('active')) {
+                        chatBox.classList.add('active');
+                    }
+                    addMessage(data.message, 'agent');
+                } else if (data.message) {
+                    addMessage(data.message, 'agent');
+                }
+            };
+        }
+
+        function addMessage(text, sender) {
+            const messages = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.innerHTML = `<div class="message-bubble">${text}</div>`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const val = input.value.trim();
+            if (!val || !ws) return;
+            addMessage(val, 'user');
+            ws.send(JSON.stringify({ message: val }));
+            input.value = '';
+        }
+    </script>
+</body>
+</html>
