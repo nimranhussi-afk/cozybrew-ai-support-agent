@@ -2,6 +2,7 @@
 Google Sheets manager for CozyBrew Coffee Shop
 """
 
+import json
 import os
 from datetime import datetime
 from google.oauth2.service_account import Credentials
@@ -14,7 +15,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 class SheetsManager:
     def __init__(self):
         self.sheet_id = os.getenv("GOOGLE_SHEET_ID", "")
-        self.credentials_file = os.getenv("GOOGLE_CREDENTIALS", "credentials.json")
+        self.credentials_env = os.getenv("GOOGLE_CREDENTIALS", "credentials.json")
         self._service = None
         self._initialized = False
         self._init_error = None
@@ -27,14 +28,29 @@ class SheetsManager:
                 print(f"[SheetsManager] {self._init_error}")
                 return
 
-            if not os.path.exists(self.credentials_file):
-                self._init_error = f"Credentials file not found: {self.credentials_file}"
-                print(f"[SheetsManager] {self._init_error}")
-                return
+            creds = None
+            # 1. Try loading directly from JSON string passed as environment variable
+            if self.credentials_env and self.credentials_env.strip().startswith("{"):
+                try:
+                    creds_info = json.loads(self.credentials_env)
+                    creds = Credentials.from_service_account_info(
+                        creds_info, scopes=SCOPES
+                    )
+                except Exception as json_err:
+                    print(f"[SheetsManager] Failed to parse JSON from env: {json_err}")
 
-            creds = Credentials.from_service_account_file(
-                self.credentials_file, scopes=SCOPES
-            )
+            # 2. Fallback to reading local credentials file (for local development)
+            if creds is None:
+                creds_file = self.credentials_env or "credentials.json"
+                if not os.path.exists(creds_file):
+                    self._init_error = f"Credentials file or valid JSON env variable not found: {creds_file}"
+                    print(f"[SheetsManager] {self._init_error}")
+                    return
+
+                creds = Credentials.from_service_account_file(
+                    creds_file, scopes=SCOPES
+                )
+
             self._service = build("sheets", "v4", credentials=creds)
             self._initialized = True
             print("[SheetsManager] Initialized successfully")
