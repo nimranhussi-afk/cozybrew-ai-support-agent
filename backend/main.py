@@ -193,6 +193,9 @@ async def root():
     if os.path.exists(chat_file_path):
         return FileResponse(chat_file_path)
     return {"message": "CozyBrew AI Support Agent API is live!", "docs": "/docs"}
+@app.get("/api/health")
+async def api_health():
+    return {"status": "ok"}
 
 
 class ConnectionManager:
